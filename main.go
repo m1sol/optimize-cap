@@ -15,7 +15,7 @@ type VPN struct {
 type ControlVPN struct {
 	mu sync.Mutex
 
-	ticker   time.Ticker
+	ticker   *time.Ticker
 	Vpn      []VPN
 	capacity int
 }
@@ -24,7 +24,7 @@ func NewControlVPN(cap int, duration time.Duration) *ControlVPN {
 	c := &ControlVPN{
 		capacity: cap,
 		Vpn:      make([]VPN, 0, cap),
-		ticker:   *time.NewTicker(time.Second * duration),
+		ticker:   time.NewTicker(time.Second * duration),
 	}
 
 	go func() {
