@@ -16,17 +16,15 @@ type VPN struct {
 type ControlVPN struct {
 	mu sync.Mutex
 
-	ticker   *time.Ticker
-	Vpn      []VPN
-	capacity int
+	ticker *time.Ticker
+	Vpn    []VPN
 }
 
 func NewControlVPN(ctx context.Context, cap int, duration time.Duration) *ControlVPN {
 
 	c := &ControlVPN{
-		capacity: cap,
-		Vpn:      make([]VPN, 0, cap),
-		ticker:   time.NewTicker(time.Second * duration),
+		Vpn:    make([]VPN, 0, cap),
+		ticker: time.NewTicker(time.Second * duration),
 	}
 
 	go func() {
@@ -75,9 +73,6 @@ func (c *ControlVPN) optimizeCap() {
 	defer c.mu.Unlock()
 	if len(c.Vpn)*3 < cap(c.Vpn) {
 		capacity := len(c.Vpn) * 2
-		if capacity < c.capacity {
-			capacity = c.capacity
-		}
 		newSlice := make([]VPN, len(c.Vpn), capacity)
 		copy(newSlice, c.Vpn)
 		c.Vpn = newSlice
