@@ -1,6 +1,7 @@
 package vpn
 
 import (
+	"context"
 	"slices"
 	"sync"
 	"time"
@@ -20,7 +21,8 @@ type ControlVPN struct {
 	capacity int
 }
 
-func NewControlVPN(cap int, duration time.Duration) *ControlVPN {
+func NewControlVPN(ctx context.Context, cap int, duration time.Duration) *ControlVPN {
+
 	c := &ControlVPN{
 		capacity: cap,
 		Vpn:      make([]VPN, 0, cap),
@@ -28,7 +30,7 @@ func NewControlVPN(cap int, duration time.Duration) *ControlVPN {
 	}
 
 	go func() {
-		c.cron()
+		c.cron(ctx)
 	}()
 
 	return c
@@ -55,12 +57,16 @@ func (c *ControlVPN) Del(vpn VPN) bool {
 	return false
 }
 
-func (c *ControlVPN) cron() {
+func (c *ControlVPN) cron(ctx context.Context) {
 	for {
 		select {
 		case <-c.ticker.C:
 			c.optimizeCap()
+		case <-ctx.Done():
+			c.ticker.Stop()
+			return
 		}
+
 	}
 }
 
